@@ -46,6 +46,59 @@
   }
 
   /* =====================================================
+     FOLIO DE PEDIDO
+     Formato: [Inicial del mes][Día 2 dígitos][Número 3 dígitos]
+     Ejemplo: pedido #1 del 9 de octubre -> O09001
+  ===================================================== */
+
+  // 'consecutivo' = 001, 002, 003... (se reinicia cada día en este navegador)
+  // 'aleatorio'   = número al azar entre 001 y 999
+  const MODO_FOLIO = 'consecutivo';
+  const CLAVE_FOLIO = 'noellas_folio_contador';
+
+  const MESES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  // Devuelve el siguiente número de pedido (1-999) según el modo elegido
+  function siguienteNumeroPedido(fechaISO) {
+    const aleatorio = function () {
+      return Math.floor(Math.random() * 999) + 1;
+    };
+
+    if (MODO_FOLIO === 'aleatorio') {
+      return aleatorio();
+    }
+
+    try {
+      const guardado = JSON.parse(localStorage.getItem(CLAVE_FOLIO)) || {};
+
+      // Si es otro día, el contador vuelve a empezar
+      let numero = guardado.fecha === fechaISO ? Number(guardado.numero) || 0 : 0;
+
+      // Pasado 999 se reinicia para no romper el formato de 3 dígitos
+      numero = numero >= 999 ? 1 : numero + 1;
+
+      localStorage.setItem(CLAVE_FOLIO, JSON.stringify({ fecha: fechaISO, numero: numero }));
+      return numero;
+    } catch (error) {
+      // Si no hay almacenamiento disponible, se usa un número aleatorio
+      return aleatorio();
+    }
+  }
+
+  // Genera el folio completo, por ejemplo "O09001"
+  function generarFolio() {
+    const ahora = new Date();
+    const letra = MESES[ahora.getMonth()].charAt(0).toUpperCase();
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const numero = String(siguienteNumeroPedido(aISO(ahora))).padStart(3, '0');
+
+    return letra + dia + numero;
+  }
+
+  /* =====================================================
      FECHAS
   ===================================================== */
 
@@ -225,23 +278,29 @@
     ].filter(Boolean);
   }
 
-  function mensajeIndividual(item) {
+  function mensajeIndividual(item, folio) {
+    folio = folio || generarFolio();
+
     return [
-      'Hola, me gustaría hacer el siguiente pedido:',
+      '¡Hola! Quiero confirmar mi pedido con Folio: *' + folio + '*',
       '',
       lineasItem(item).join('\n'),
+      '',
+      textoTotal([item]),
       '',
       '¿Me confirmas disponibilidad y costo? ¡Gracias!'
     ].join('\n');
   }
 
-  function mensajeCarrito(items) {
+  function mensajeCarrito(items, folio) {
+    folio = folio || generarFolio();
+
     const bloques = items.map(function (item, indice) {
       return '*Pedido ' + (indice + 1) + '*\n' + lineasItem(item).join('\n');
     });
 
     return [
-      'Hola, me gustaría hacer el siguiente pedido completo:',
+      '¡Hola! Quiero confirmar mi pedido con Folio: *' + folio + '*',
       '',
       bloques.join('\n\n'),
       '',
@@ -1239,6 +1298,7 @@
 
   window.Noellas = {
     abrirWhatsApp: abrirWhatsApp,
+    generarFolio: generarFolio,
     actualizarContador: actualizarContador,
     esc: esc,
     formatoFecha: formatoFecha,
