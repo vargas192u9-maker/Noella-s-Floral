@@ -47,55 +47,47 @@
 
   /* =====================================================
      FOLIO DE PEDIDO
-     Formato: [Inicial del mes][Día 2 dígitos][Número 3 dígitos]
-     Ejemplo: pedido #1 del 9 de octubre -> O09001
+     Formato: [Inicial del mes][Día 2 dígitos]-[Nombre del cliente]
+     Ejemplo: Maria Lopez el 9 de octubre -> O09-MARIA
   ===================================================== */
-
-  // 'consecutivo' = 001, 002, 003... (se reinicia cada día en este navegador)
-  // 'aleatorio'   = número al azar entre 001 y 999
-  const MODO_FOLIO = 'consecutivo';
-  const CLAVE_FOLIO = 'noellas_folio_contador';
 
   const MESES = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  // Devuelve el siguiente número de pedido (1-999) según el modo elegido
-  function siguienteNumeroPedido(fechaISO) {
-    const aleatorio = function () {
-      return Math.floor(Math.random() * 999) + 1;
-    };
-
-    if (MODO_FOLIO === 'aleatorio') {
-      return aleatorio();
-    }
-
-    try {
-      const guardado = JSON.parse(localStorage.getItem(CLAVE_FOLIO)) || {};
-
-      // Si es otro día, el contador vuelve a empezar
-      let numero = guardado.fecha === fechaISO ? Number(guardado.numero) || 0 : 0;
-
-      // Pasado 999 se reinicia para no romper el formato de 3 dígitos
-      numero = numero >= 999 ? 1 : numero + 1;
-
-      localStorage.setItem(CLAVE_FOLIO, JSON.stringify({ fecha: fechaISO, numero: numero }));
-      return numero;
-    } catch (error) {
-      // Si no hay almacenamiento disponible, se usa un número aleatorio
-      return aleatorio();
-    }
+  // Primer nombre en mayúsculas, sin acentos ni símbolos (máx. 12 caracteres)
+  function nombreParaFolio(nombre) {
+    return String(nombre || '')
+      .trim()
+      .split(/\s+/)[0]
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toUpperCase()
+      .slice(0, 12);
   }
 
-  // Genera el folio completo, por ejemplo "O09001"
-  function generarFolio() {
+  // Genera el folio, por ejemplo "O09-MARIA"
+  function generarFolio(nombre) {
     const ahora = new Date();
     const letra = MESES[ahora.getMonth()].charAt(0).toUpperCase();
     const dia = String(ahora.getDate()).padStart(2, '0');
-    const numero = String(siguienteNumeroPedido(aISO(ahora))).padStart(3, '0');
 
-    return letra + dia + numero;
+    // Si por alguna razón no hay nombre, se usa un número de 3 dígitos
+    const sufijo = nombreParaFolio(nombre) ||
+      String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+
+    return letra + dia + '-' + sufijo;
+  }
+
+  // Busca el nombre registrado en los datos de envío del pedido
+  function nombreDePedido(items) {
+    const conEnvio = items.find(function (item) {
+      return item.envio && item.envio.nombre;
+    });
+
+    return conEnvio ? conEnvio.envio.nombre : '';
   }
 
   /* =====================================================
@@ -279,7 +271,7 @@
   }
 
   function mensajeIndividual(item, folio) {
-    folio = folio || generarFolio();
+    folio = folio || generarFolio(nombreDePedido([item]));
 
     return [
       '¡Hola! Quiero confirmar mi pedido con Folio: *' + folio + '*',
@@ -293,7 +285,7 @@
   }
 
   function mensajeCarrito(items, folio) {
-    folio = folio || generarFolio();
+    folio = folio || generarFolio(nombreDePedido(items));
 
     const bloques = items.map(function (item, indice) {
       return '*Pedido ' + (indice + 1) + '*\n' + lineasItem(item).join('\n');
