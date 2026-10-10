@@ -1,0 +1,87 @@
+/* Usa las variables y componentes de styles.css (paleta oficial) */
+
+.envio-caja {
+  max-width: 640px;
+}
+
+.envio-bloque {
+  background-color: var(--beige);
+  border: 1px solid rgba(201, 166, 107, .45);
+  border-radius: 1rem;
+  padding: 1.3rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 6px 20px rgba(138, 117, 107, .15);
+}
+
+.envio-bloque h2 {
+  font-size: 1.35rem;
+  color: var(--taupe-oscuro);
+  margin: 0 0 .2rem;
+}
+
+.envio-resumen {
+  font-size: .85rem;
+  margin-bottom: .8rem;
+  padding-bottom: .8rem;
+  border-bottom: 1px dashed var(--dorado);
+}
+
+.envio-bloque .form-label {
+  margin: .6rem 0 .2rem;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--taupe-oscuro);
+}
+
+.envio-bloque .form-control {
+  background-color: var(--marfil);
+  border: 1px solid var(--dorado);
+  color: var(--taupe-oscuro);
+  font-size: .9rem;
+}
+
+.envio-bloque .form-control:focus,
+.envio-bloque .form-check-input:focus {
+  border-color: var(--dorado);
+  box-shadow: 0 0 0 .2rem rgba(201, 166, 107, .3);
+}
+
+.envio-bloque .form-check-input {
+  border-color: var(--dorado);
+}
+
+.envio-bloque .form-check-input:checked {
+  background-color: var(--dorado);
+  border-color: var(--dorado);
+}
+
+.envio-error {
+  background-color: var(--marfil);
+  border: 1px solid var(--error);
+  border-radius: .6rem;
+  color: var(--error);
+  font-size: .85rem;
+  padding: .75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.envio-acciones {
+  display: grid;
+  gap: .5rem;
+  margin-top: 1.25rem;
+}
+
+.envio-nota {
+  margin-top: 1.5rem;
+  font-size: .75rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.envio-vacio {
+  text-align: center;
+  padding: 3rem 1rem;
+}

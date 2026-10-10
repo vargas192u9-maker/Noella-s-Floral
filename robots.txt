@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /404.html
+
+Sitemap: https://vargas192u9-maker.github.io/Noella-s-Floral/sitemap.xml
